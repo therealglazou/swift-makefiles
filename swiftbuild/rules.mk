@@ -1,4 +1,4 @@
-include $(TOPSRCDIR)/config/checkconfig.mk
+include $(TOPSRCDIR)/swiftbuild/checkconfig.mk
 
 ifndef OBJS
 _OBJS = $(patsubst %.swift,%.o,$(SOURCES))
