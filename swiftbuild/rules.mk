@@ -36,7 +36,7 @@ dirs: $(DIRS)
 
 %.o: %.swift
 		#   building $(shell echo "$*.swift")
-		$(SWIFT) $(CFLAGS) $(IMPORTS) -primary-file $*.swift \
+		@$(SWIFT) $(CFLAGS) $(IMPORTS) -primary-file $*.swift \
 			$(filter-out $*.swift,$(SOURCES)) -sdk $(SDK_PATH) \
 			-module-name $(MODULE_NAME) -o $*.o -emit-module \
 			-emit-module-path $*~partial.swiftmodule
