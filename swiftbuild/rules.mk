@@ -9,6 +9,8 @@ ifdef APP_NAME
 OBJS += main.o
 endif
 
+IMPORTS += -I $(OBJDIR)/modules
+
 build: dirs $(OBJS)
 ifdef DIRS
 endif # DIRS
@@ -16,7 +18,7 @@ endif # DIRS
 ifdef MODULE_NAME
 ifdef SOURCES
 		# building lib$(MODULE_NAME).dylib and $(MODULE_NAME).swiftmodule
-		@$(SWIFTC) $(CFLAGS) $(INCLUDES) -emit-library -emit-module -emit-module-path $(OBJDIR)/modules/$(MODULE_NAME).swiftmodule -module-name $(MODULE_NAME) -L $(OBJDIR) $(LIBS) -sdk $(SDK_PATH) $(SOURCES)
+		@$(SWIFTC) $(CFLAGS) $(IMPORTS) -emit-library -emit-module -emit-module-path $(OBJDIR)/modules/$(MODULE_NAME).swiftmodule -module-name $(MODULE_NAME) -L $(OBJDIR) $(LIBS) -sdk $(SDK_PATH) $(SOURCES)
 		# fixing rpath in lib$(MODULE_NAME).dylib
 	  @install_name_tool -id @rpath/lib$(MODULE_NAME).dylib lib$(MODULE_NAME).dylib
 		# installing lib$(MODULE_NAME).dylib in $(OBJDIR)
@@ -34,14 +36,14 @@ dirs: $(DIRS)
 
 %.o: %.swift
 		#   building $(shell echo "$*.swift")
-		$(SWIFT) $(CFLAGS) $(INCLUDES) -primary-file $*.swift \
+		$(SWIFT) $(CFLAGS) $(IMPORTS) -primary-file $*.swift \
 			$(filter-out $*.swift,$(SOURCES)) -sdk $(SDK_PATH) \
 			-module-name $(MODULE_NAME) -o $*.o -emit-module \
 			-emit-module-path $*~partial.swiftmodule
 
 main.o: main.swift
 		# building main.swift
-		@$(SWIFT) $(CFLAGS) $(INCLUDES) -emit-object -o main.o -sdk $(SDK_PATH) main.swift
+		@$(SWIFT) $(CFLAGS) $(IMPORTS) -emit-object -o main.o -sdk $(SDK_PATH) main.swift
 
 clean:
 		$(shell rm -fr  _obj *.o *~partial.swiftmodule lib$(MODULE_NAME).dylib*)
