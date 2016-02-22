@@ -9,6 +9,13 @@ ifdef APP_NAME
 OBJS += main.o
 endif
 
+ifdef APP_BUNDLE_NAME
+APP_BUNDLE           = $(OBJDIR)/$(APP_BUNDLE_NAME).app
+APP_BUNDLE_CONTENTS  = $(APP_BUNDLE)/Contents
+APP_BUNDLE_MACOS     = $(APP_BUNDLE_CONTENTS)/MacOS
+APP_BUNDLE_RESOURCES = $(APP_BUNDLE_CONTENTS)/Resources
+endif
+
 IMPORTS += -I $(OBJDIR)/modules
 
 build: dirs $(OBJS)
@@ -27,7 +34,21 @@ endif # SOURCES
 endif # MODULE_NAME
 ifdef APP_NAME
 		# creating executable $(APP_NAME) in $(OBJDIR)
-		@$(LD) $(LDFLAGS) -o $(OBJDIR)/main -L$(TOOLCHAIN_PATH) -Lbin $(LIBS) -rpath @executable_path main.o
+		@$(LD) $(LDFLAGS) -o $(OBJDIR)/$(APP_NAME) -L$(TOOLCHAIN_PATH) -Lbin $(LIBS) -rpath @executable_path main.o
+ifdef APP_BUNDLE_NAME
+		# creating $(APP_BUNDLE)
+		@rm -fr $(APP_BUNDLE_NAME).app
+		@mkdir -p $(APP_BUNDLE_MACOS)
+		@mkdir -p $(APP_BUNDLE_RESOURCES)
+		@cp Info.plist $(APP_BUNDLE_CONTENTS)
+		@cp PkgInfo $(APP_BUNDLE_CONTENTS)
+		@cp $(APP_NAME).icns $(APP_BUNDLE_RESOURCES)
+		@if [ -d "Resources" ]; then cp -fr Resources/* $(APP_BUNDLE_RESOURCES); fi
+		@cp $(OBJDIR)/$(APP_NAME) $(APP_BUNDLE_MACOS)
+		@cp $(OBJDIR)/*dylib $(APP_BUNDLE_MACOS)
+		@chmod +x $(APP_BUNDLE_MACOS)/$(APP_NAME)
+		@touch $(APP_BUNDLE)
+endif
 		# DONE!
 endif #APP_NAME
 
