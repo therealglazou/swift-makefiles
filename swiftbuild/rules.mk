@@ -36,6 +36,7 @@ ifdef APP_NAME
 		# creating executable $(APP_NAME) in $(OBJDIR)
 		@$(LD) $(LDFLAGS) -o $(OBJDIR)/$(APP_NAME) -L$(TOOLCHAIN_PATH) -Lbin $(LIBS) -rpath @executable_path main.o
 ifdef APP_BUNDLE_NAME
+		#####################################################
 		# creating $(APP_BUNDLE)
 		@rm -fr $(APP_BUNDLE_NAME).app
 		@mkdir -p $(APP_BUNDLE_MACOS)
