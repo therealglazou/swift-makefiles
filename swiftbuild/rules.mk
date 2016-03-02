@@ -3,6 +3,8 @@ include $(TOPSRCDIR)/swiftbuild/checkconfig.mk
 ifndef OBJS
 _OBJS = $(patsubst %.swift,%.o,$(SOURCES))
 OBJS    = $(strip $(_OBJS))
+_SWIFTMODULES = $(patsubst %.swift,%~partial.swiftmodule,$(SOURCES))
+SWIFTMODULES = $(strip $(_SWIFTMODULES))
 endif
 
 ifdef APP_NAME
@@ -19,8 +21,6 @@ endif
 IMPORTS += -I $(OBJDIR)/modules
 
 build: dirs $(OBJS)
-ifdef DIRS
-endif # DIRS
 		$(shell mkdir -p $(OBJDIR)/modules)
 ifdef MODULE_NAME
 ifdef SOURCES
@@ -54,7 +54,7 @@ endif
 endif #APP_NAME
 
 dirs: $(DIRS)
-		@for d in $(DIRS); do (cd $$d; $(MAKE) build ); done
+		@for d in $(DIRS); do (echo "# Entering directory $$d"; cd $$d; $(MAKE) build ); done
 
 %.o: %.swift
 		#   building $(shell echo "$*.swift")
@@ -68,7 +68,7 @@ main.o: main.swift
 		@$(SWIFT) $(CFLAGS) $(IMPORTS) -emit-object -o main.o -sdk $(SDK_PATH) main.swift
 
 clean:
-		$(shell rm -fr  _obj *.o *~partial.swiftmodule lib$(MODULE_NAME).dylib*)
+		$(shell rm -fr  _obj $(OBJS) $(SWIFTMODULES) lib$(MODULE_NAME).dylib*)
 ifdef DIRS
-		@for d in $(DIRS); do (cd $$d; $(MAKE) clean ); done
+		@for d in $(DIRS); do (echo "# cleaning $$d"; cd $$d; $(MAKE) clean ); done
 endif
