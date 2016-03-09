@@ -9,6 +9,7 @@ endif
 
 ifdef APP_NAME
 OBJS += main.o
+.NOTPARALLEL: main.o
 endif
 
 ifdef APP_BUNDLE_NAME
@@ -24,8 +25,10 @@ build: dirs $(OBJS)
 		$(shell mkdir -p $(OBJDIR)/modules)
 ifdef MODULE_NAME
 ifdef SOURCES
-		# building lib$(MODULE_NAME).dylib and $(MODULE_NAME).swiftmodule
-		@$(SWIFTC) $(CFLAGS) $(IMPORTS) -emit-library -emit-module -emit-module-path $(OBJDIR)/modules/$(MODULE_NAME).swiftmodule -module-name $(MODULE_NAME) -L $(OBJDIR) $(LIBS) -sdk $(SDK_PATH) $(SOURCES)
+		# building $(MODULE_NAME).swiftmodule from partial swiftmodules
+		@$(SWIFT) $(CFLAGS) $(IMPORTS) -emit-module -parse-as-library -emit-module-path $(OBJDIR)/modules/$(MODULE_NAME).swiftmodule -module-name $(MODULE_NAME) -L $(OBJDIR)/modules $(LIBS) -sdk $(SDK_PATH) $(SWIFTMODULES)
+		# building lib$(MODULE_NAME).dylib
+		@$(CXX) -dynamiclib -undefined suppress -flat_namespace -L $(TOOLCHAIN_PATH) $(OBJS) -o lib$(MODULE_NAME).dylib 
 		# fixing rpath in lib$(MODULE_NAME).dylib
 	  @install_name_tool -id @rpath/lib$(MODULE_NAME).dylib lib$(MODULE_NAME).dylib
 		# installing lib$(MODULE_NAME).dylib in $(OBJDIR)
